@@ -20,8 +20,12 @@ return [
             'as access' => [
                 'class' => yii2mod\rbac\filters\AccessControl::class
             ],
-        ]
+        ],
+        'test' => [
+            'class' => 'frontend\modules\test\Module',
+        ],
     ],
+
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',
@@ -76,9 +80,9 @@ return [
                 'basePath' => '@app/themes/news', // базовая директория со стилизованными ресурсами
                 'baseUrl' => '@web/themes/news', // базовый адрес доступа к стилизованным ресурсам
                 'pathMap' => [ // правила замены файлов view
-                    '@app/views/user' => '@app/themes/news/user',
-                    '@app/modules' => '@app/themes/news/modules',
-                    '@app/widgets' => '@app/themes/news/widgets',
+                    '@app/views/hello' => '@app/themes/new/hello',
+                    //'@app/modules' => '@app/themes/news/modules',
+                    //'@app/widgets' => '@app/themes/news/widgets',
                 ],
             ],
         ],
