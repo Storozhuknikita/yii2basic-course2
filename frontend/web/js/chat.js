@@ -1,5 +1,8 @@
 let chat = new WebSocket('ws://localhost:8080/');
 let username = $('.js-username').val();
+let SHOW_HISTORY = 1;
+let SEND_MESSAGE = 2;
+
 
 chat.onmessage = function (e) {
     $('#response').text('');
@@ -10,15 +13,21 @@ chat.onmessage = function (e) {
 };
 
 chat.onopen = function (e) {
-    $('#response').text("Connection established!");
+    console.log("Connection established!");
+    chat.send(JSON.stringify({
+            'username': username,
+            'type': SHOW_HISTORY,
+        })
+    );
 };
 
 
 $('#send').click(function () {
     chat.send(JSON.stringify({
             'username': username,
-            'message': $('#message').val()
-        })
+            'message': $('#message').val(),
+            'type': SEND_MESSAGE
+    })
     );
     $('#message').val('');
 });
