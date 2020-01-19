@@ -3,9 +3,9 @@
 use yii\db\Migration;
 
 /**
- * Class m200113_173622_add_column_type_at_chat_log_table
+ * Class m200119_163636_add_column_type_at_chat_log_table
  */
-class m200113_173622_add_column_type_at_chat_log_table extends Migration
+class m200119_163636_add_column_type_at_chat_log_table extends Migration
 {
     /**
      * {@inheritdoc}
