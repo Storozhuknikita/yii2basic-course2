@@ -38,6 +38,8 @@ AppAsset::register($this);
     $menuItems = [
         ['label' => 'Home', 'url' => ['/site/index']],
         ['label' => 'Contact', 'url' => ['/site/contact']],
+        ['label' => 'Chat', 'url' => ['/chat/index']],
+        ['label' => 'Projects', 'url' => ['/project/index']],
         ['label' => 'Task', 'url' => ['/task/index']],
     ];
     if (Yii::$app->user->isGuest) {
