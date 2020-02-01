@@ -34,6 +34,7 @@ class Task extends \yii\db\ActiveRecord
     const STATUS_NEW = 1;
     const STATUS_IN_PROGRESS = 2;
     const STATUS_DONE = 3;
+
     /**
      * {@inheritdoc}
      */
@@ -42,6 +43,9 @@ class Task extends \yii\db\ActiveRecord
         return 'task';
     }
 
+    /**
+     * @return bool
+     */
     public function beforeValidate()
     {
         if (!empty($this->template_id)) {
@@ -54,6 +58,9 @@ class Task extends \yii\db\ActiveRecord
     }
 
 
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         return [TimestampBehavior::class => ['class' => TimestampBehavior::class]];
@@ -66,13 +73,14 @@ class Task extends \yii\db\ActiveRecord
     {
         return [
             [['is_template'], 'boolean'],
-            [['author_id', 'executor_id', 'priority_id', 'status', 'created_at', 'updated_at', 'template_id'], 'integer'],
+            [['author_id', 'executor_id', 'project_id', 'priority_id', 'status', 'created_at', 'updated_at', 'template_id'], 'integer'],
             [['description'], 'string'],
             [['title'], 'string', 'max' => 255],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['author_id' => 'id']],
             [['executor_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['executor_id' => 'id']],
             [['template_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::class, 'targetAttribute' => ['template_id' => 'id']],
             [['priority_id'], 'exist', 'skipOnError' => false, 'targetClass' => Priority::class, 'targetAttribute' => ['priority_id' => 'id']],
+            [['project_id'], 'exist', 'skipOnError' => false, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
         ];
     }
 
@@ -83,6 +91,7 @@ class Task extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
+            'project_id' => 'Project ID',
             'author_id' => 'Author ID',
             'executor_id' => 'Executor ID',
             'title' => 'Title',
