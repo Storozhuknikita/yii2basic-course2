@@ -30,10 +30,27 @@ $this->title = 'My Yii Application';
             <div class="col-lg-4">
                 <h2>Heading</h2>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+                <p>
+                    <?= \yii\helpers\Html::a("Показать дату", 'js:', ['class' => 'btn btn-lg btn-primary js-set-data']) ?>
+                    <?= \yii\helpers\Html::a("Показать время", 'js:', ['class' => 'btn btn-lg btn-success js-get-time']) ?>
+                    <h1 class="js-set-data">Сейчас: <?=$response?></h1>
+                </p>
+                <?php
+                $js = <<<JS
+                 $(document).on('.js-get-time','click', function () {
+                     debugger;
+                     $.ajax({
+                         url:'/site/time'
+                     }).success(function (data) {
+                         console.log(data);
+                         $('.js-set-data').html(data.time)
+                     })
+                 });
+        JS;
+
+                $this->registerJs($js, yii\web\View::POS_LOAD);
+
+                ?>
 
                 <p><a class="btn btn-default" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
             </div>
