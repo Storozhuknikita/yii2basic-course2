@@ -2,32 +2,78 @@
 namespace common\models;
 
 use Yii;
+use yii\base\Exception;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
 /**
- * User model
- *
- * @property integer $id
- * @property string $username
- * @property string $password_hash
- * @property string $password_reset_token
- * @property string $verification_token
- * @property string $email
- * @property string $auth_key
- * @property integer $status
- * @property integer $created_at
- * @property integer $updated_at
- * @property string $password write-only password
+ * Class User
+ * @package common\models
+ * @property string $Host [char(60)]
+ * @property string $User [char(32)]
+ * @property string $Select_priv [enum('N', 'Y')]
+ * @property string $Insert_priv [enum('N', 'Y')]
+ * @property string $Update_priv [enum('N', 'Y')]
+ * @property string $Delete_priv [enum('N', 'Y')]
+ * @property string $Create_priv [enum('N', 'Y')]
+ * @property string $Drop_priv [enum('N', 'Y')]
+ * @property string $Reload_priv [enum('N', 'Y')]
+ * @property string $Shutdown_priv [enum('N', 'Y')]
+ * @property string $Process_priv [enum('N', 'Y')]
+ * @property string $File_priv [enum('N', 'Y')]
+ * @property string $Grant_priv [enum('N', 'Y')]
+ * @property string $References_priv [enum('N', 'Y')]
+ * @property string $Index_priv [enum('N', 'Y')]
+ * @property string $Alter_priv [enum('N', 'Y')]
+ * @property string $Show_db_priv [enum('N', 'Y')]
+ * @property string $Super_priv [enum('N', 'Y')]
+ * @property string $Create_tmp_table_priv [enum('N', 'Y')]
+ * @property string $Lock_tables_priv [enum('N', 'Y')]
+ * @property string $Execute_priv [enum('N', 'Y')]
+ * @property string $Repl_slave_priv [enum('N', 'Y')]
+ * @property string $Repl_client_priv [enum('N', 'Y')]
+ * @property string $Create_view_priv [enum('N', 'Y')]
+ * @property string $Show_view_priv [enum('N', 'Y')]
+ * @property string $Create_routine_priv [enum('N', 'Y')]
+ * @property string $Alter_routine_priv [enum('N', 'Y')]
+ * @property string $Create_user_priv [enum('N', 'Y')]
+ * @property string $Event_priv [enum('N', 'Y')]
+ * @property string $Trigger_priv [enum('N', 'Y')]
+ * @property string $Create_tablespace_priv [enum('N', 'Y')]
+ * @property string $ssl_type [enum('', 'ANY', 'X509', 'SPECIFIED')]
+ * @property string $ssl_cipher [blob]
+ * @property string $x509_issuer [blob]
+ * @property string $x509_subject [blob]
+ * @property int $max_questions [int(11) unsigned]
+ * @property int $max_updates [int(11) unsigned]
+ * @property int $max_connections [int(11) unsigned]
+ * @property int $max_user_connections [int(11) unsigned]
+ * @property string $plugin [char(64)]
+ * @property string $authentication_string
+ * @property string $password_expired [enum('N', 'Y')]
+ * @property int $password_last_changed [timestamp]
+ * @property int $password_lifetime [smallint(5) unsigned]
+ * @property string $account_locked [enum('N', 'Y')]
+ * @property int $id [int(11)]
+ * @property string $username [varchar(255)]
+ * @property string $auth_key [varchar(32)]
+ * @property string $password_hash [varchar(255)]
+ * @property string $password_reset_token [varchar(255)]
+ * @property string $email [varchar(255)]
+ * @property int $status [smallint(6)]
+ * @property int $created_at [int(11)]
+ * @property int $updated_at [int(11)]
+ * @property string $verification_token [varchar(255)]
  */
+
 class User extends ActiveRecord implements IdentityInterface
 {
+    const SYSTEM = 'system';
     const STATUS_DELETED = 0;
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 10;
-
 
     /**
      * {@inheritdoc}
@@ -53,6 +99,9 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
+            [['username', 'email'], 'string'],
+            [['username', 'email'], 'required'],
+            [['email'], 'email'],
             ['status', 'default', 'value' => self::STATUS_INACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
         ];
@@ -71,7 +120,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
+        return static::findOne(['auth_key' => $token, 'status' => self::STATUS_ACTIVE]);
     }
 
     /**
@@ -172,6 +221,7 @@ class User extends ActiveRecord implements IdentityInterface
      * Generates password hash from password and sets it to the model
      *
      * @param string $password
+     * @throws Exception
      */
     public function setPassword($password)
     {
@@ -180,6 +230,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     /**
      * Generates "remember me" authentication key
+     * @throws Exception
      */
     public function generateAuthKey()
     {
@@ -188,6 +239,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     /**
      * Generates new password reset token
+     * @throws Exception
      */
     public function generatePasswordResetToken()
     {
@@ -196,6 +248,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     /**
      * Generates new token for email verification
+     * @throws Exception
      */
     public function generateEmailVerificationToken()
     {
@@ -209,4 +262,35 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->password_reset_token = null;
     }
+
+    /**
+     * @return array|false
+     */
+    public function fields()
+    {
+        $fields =  parent::fields();
+        unset($fields['password_hash']);
+        unset($fields['verification_token']);
+        return $fields;
+    }
+
+    /**
+     * @param bool $insert
+     * @return bool
+     * @throws Exception
+     */
+    public function beforeSave($insert)
+    {
+        if (Yii::$app->request->isPost) {
+            $this->generateAuthKey();
+            $this->generateEmailVerificationToken();
+            if (empty(Yii::$app->request->post('password'))){
+                $this->setPassword(Yii::$app->security->generatePasswordHash(6));
+            } else {
+                $this->setPassword(Yii::$app->request->post('password'));
+            }
+        }
+        return parent::beforeSave($insert);
+    }
+
 }

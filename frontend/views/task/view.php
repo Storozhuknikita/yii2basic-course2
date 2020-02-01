@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use frontend\widgets\chat\Chat;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Task */
@@ -32,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'author_id',
             'executor_id',
+            'project_id',
             'title',
             'description:ntext',
             'priority.title',
@@ -48,5 +50,5 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
 
 </div>
+<?= Chat::widget(['task_id' => $model->id, 'project_id' => $model->project_id ]) ?>
 
-<?= \frontend\widgets\chat\Chat::widget()?>

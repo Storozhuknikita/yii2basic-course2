@@ -5,8 +5,10 @@ namespace frontend\models;
 use common\models\Project;
 use common\models\Task;
 use Yii;
+use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 
 /**
@@ -26,7 +28,6 @@ use yii\db\ActiveQuery;
  */
 class ChatLog extends \yii\db\ActiveRecord
 {
-
     const SHOW_HISTORY = 1;
     const SEND_MESSAGE = 2;
 
@@ -62,7 +63,9 @@ class ChatLog extends \yii\db\ActiveRecord
      */
     public function behaviors()
     {
-        return [TimestampBehavior::class => ['class' => TimestampBehavior::class]];
+        return [
+            TimestampBehavior::class => ['class' => TimestampBehavior::class],
+        ];
     }
 
     /**
@@ -76,6 +79,8 @@ class ChatLog extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'message' => 'Message',
+            'task_id' => 'Task Id',
+            'project_id' => 'Project Id'
         ];
     }
 
