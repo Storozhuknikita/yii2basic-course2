@@ -28,7 +28,6 @@ class SocketServer implements MessageComponentInterface
     public function onOpen(ConnectionInterface $conn)
     {
         $this->clients->attach($conn);
-        $this->sendHelloMessage($conn);
         echo "New connection! ({$conn->resourceId})\n";
     }
 
@@ -45,7 +44,7 @@ class SocketServer implements MessageComponentInterface
 
         ChatLog::create($msgArray);
 
-        if ($msgArray['type'] === ChatLog::SHOW_HISTORY) {
+        if ( (int)$msgArray['type'] === ChatLog::SEND_MESSAGE) {
             $this->showHistory($from, $msgArray);
         } else {
             foreach ($this->clients as $client) {
@@ -65,7 +64,11 @@ class SocketServer implements MessageComponentInterface
      */
     private function showHistory(ConnectionInterface $conn, array $msg)
     {
-        $chatLogsQuery = ChatLog::find()->orderBy('created_at ASC');
+        $chatLogsQuery = ChatLog::find()
+            ->where(['project_id' => (int)$msg['project_id'] ])
+            ->andWhere(['task_id' => null])
+            ->orwhere(['task_id' => (int)$msg['task_id'] ])
+            ->orderBy('created_at ASC');
 
         if (isset($msg['task_id'])) {
             $chatLogsQuery->andWhere(['task_id' => (int) $msg['task_id']]);

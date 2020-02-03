@@ -5,6 +5,9 @@ namespace common\models;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
+use yii\helpers\Url;
+use yii\web\Link;
+use yii\web\Linkable;
 
 /**
  * This is the model class for table "task".
@@ -28,7 +31,7 @@ use yii\db\ActiveQuery;
  * @property Priority $priority
  * @property Project $project
  */
-class Task extends \yii\db\ActiveRecord
+class Task extends \yii\db\ActiveRecord implements Linkable
 {
 
     const STATUS_NEW = 1;
@@ -155,4 +158,43 @@ class Task extends \yii\db\ActiveRecord
             static::STATUS_DONE => "Done",
         ];
     }
+
+    /**
+     * @return array|false
+     */
+    public function fields()
+    {
+        return array_merge(parent::fields(),[
+            'id_clone' => function () {
+                return $this->id;
+            },
+
+        ]);
+    }
+
+    /**
+     * @return array|false
+     */
+    public function extraFields()
+    {
+        return [
+            'author',
+            'authorEmail' => function () {
+                return $this->author->email;
+            },
+
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getLinks()
+    {
+        return [
+            Link::REL_SELF => Url::to(['task/view', 'id' => $this->id]),
+            'authorEmailLink' => Url::to(['user/view', 'id'=>$this->author_id])
+        ];
+    }
+
 }

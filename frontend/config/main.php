@@ -24,11 +24,17 @@ return [
         'test' => [
             'class' => 'frontend\modules\test\Module',
         ],
+        'api' => [
+            'class' => \frontend\modules\api\Module::class
+        ],
     ],
 
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',
+            'parsers' => [
+                'application/json' => \yii\web\JsonParser::class,
+            ]
         ],
         'user' => [
             'identityClass' => 'common\models\User',
@@ -56,8 +62,28 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+
+                /*[
                 '' => 'site/index',
                 '<controller:\w+>/<action:\w+>/' => '<controller>/<action>',
+                ],*/
+                [
+                    'controller' => 'api/task',
+                    'class' => \yii\rest\UrlRule::class,
+                    'extraPatterns' => [
+                        //'METHOD action' => 'actionFunction',
+                        'POST random/<count>' => 'random',
+                        'GET data-provider/<limit>' => 'data-provider',
+                        'GET auth' => 'auth',
+                    ],
+                ],
+
+                [
+                    'controller' => 'api/user',
+                    'class' => \yii\rest\UrlRule::class,
+                    'extraPatterns' => [
+                    ],
+                ],
             ],
         ],
         /**
