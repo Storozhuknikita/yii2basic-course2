@@ -1,4 +1,5 @@
 <?php
+
 namespace console\components;
 
 use frontend\models\ChatLog;
@@ -14,6 +15,8 @@ class SocketServer implements MessageComponentInterface
 {
     protected $clients;
 
+    protected $taskClients = [];
+
     /**
      * SocketServer constructor.
      */
@@ -28,9 +31,10 @@ class SocketServer implements MessageComponentInterface
     public function onOpen(ConnectionInterface $conn)
     {
         $this->clients->attach($conn);
+        //$conn подбрасываем в набор
+        $this->sendHelloMessage($conn);
         echo "New connection! ({$conn->resourceId})\n";
     }
-
 
     /**
      * @param ConnectionInterface $from
@@ -44,7 +48,7 @@ class SocketServer implements MessageComponentInterface
 
         ChatLog::create($msgArray);
 
-        if ( (int)$msgArray['type'] === ChatLog::SEND_MESSAGE) {
+        if ($msgArray['type'] === ChatLog::SHOW_HISTORY) {
             $this->showHistory($from, $msgArray);
         } else {
             foreach ($this->clients as $client) {
@@ -64,11 +68,7 @@ class SocketServer implements MessageComponentInterface
      */
     private function showHistory(ConnectionInterface $conn, array $msg)
     {
-        $chatLogsQuery = ChatLog::find()
-            ->where(['project_id' => (int)$msg['project_id'] ])
-            ->andWhere(['task_id' => null])
-            ->orwhere(['task_id' => (int)$msg['task_id'] ])
-            ->orderBy('created_at ASC');
+        $chatLogsQuery = ChatLog::find()->orderBy('created_at ASC');
 
         if (isset($msg['task_id'])) {
             $chatLogsQuery->andWhere(['task_id' => (int) $msg['task_id']]);
@@ -94,7 +94,8 @@ class SocketServer implements MessageComponentInterface
      * @param ConnectionInterface $conn
      * @param array $msg
      */
-    private function sendMessage(ConnectionInterface $conn, array $msg){
+    private function sendMessage(ConnectionInterface $conn, array $msg)
+    {
         $conn->send(json_encode($msg));
     }
 
@@ -103,8 +104,7 @@ class SocketServer implements MessageComponentInterface
      */
     private function sendHelloMessage(ConnectionInterface $conn)
     {
-
-        $this->sendMessage($conn,['message' => 'Всем привет', 'username' => 'Чат студентов geekbrains.ru']);
+        $this->sendMessage($conn,['created_at' => '1580759152', 'message' => 'Всем привет', 'username' => 'Чат студентов geekbrains.ru']);
     }
 
     /**

@@ -3,24 +3,26 @@
 namespace common\models;
 
 use Yii;
-use yii\behaviors\TimestampBehavior;
 
 /**
- * Class Project
- * @package common\models
- * @property int $id [int(11)]
- * @property int $author_id [int(11)]
- * @property string $title [varchar(255)]
- * @property string $description
- * @property bool $priority [tinyint(3)]
- * @property bool $status [tinyint(3)]
- * @property int $created_at [bigint(20)]
- * @property int $updated_at [bigint(20)]
+ * This is the model class for table "project".
+ *
+ * @property int $id
+ * @property int|null $author_id
+ * @property string|null $title
+ * @property string|null $description
+ * @property int|null $priority
+ * @property int|null $status
+ * @property int|null $created_at
+ * @property int|null $updated_at
+ *
+ * @property Task[] $tasks
+ * @property bool $priority_id [tinyint(3)]
+ * @property bool $is_parent [tinyint(1)]
+ * @property int $parent_project_id [int(11)]
  */
 class Project extends \yii\db\ActiveRecord
 {
-    private $is_parent;
-
     /**
      * {@inheritdoc}
      */
@@ -30,25 +32,17 @@ class Project extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return array
-     */
-    public function behaviors()
-    {
-        return [TimestampBehavior::class => ['class' => TimestampBehavior::class]];
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['author_id', 'priority_id', 'status', 'created_at', 'updated_at', 'parent_project_id'], 'integer'],
+            [['author_id', 'priority', 'status', 'created_at', 'updated_at'], 'integer'],
             [['description'], 'string'],
-            [['is_parent'], 'boolean'],
             [['title'], 'string', 'max' => 255],
         ];
     }
+
     /**
      * {@inheritdoc}
      */
@@ -59,23 +53,19 @@ class Project extends \yii\db\ActiveRecord
             'author_id' => 'Author ID',
             'title' => 'Title',
             'description' => 'Description',
-            'priority_id' => 'Priority',
+            'priority' => 'Priority',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getTasks()
     {
         return $this->hasMany(Task::class, ['project_id' => 'id']);
-    }
-
-    public function getParent()
-    {
-        return $this->hasOne(Project::class, ['parent_project_id' => 'id']);
     }
 
     public function getPriority()

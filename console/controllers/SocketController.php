@@ -1,6 +1,5 @@
 <?php
-// Остановился смотреть видео на 1 час 23 минуты.
-// Выполнить второй commit
+
 namespace console\controllers;
 
 use yii\console\Controller;
